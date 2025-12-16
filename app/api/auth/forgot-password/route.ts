@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.FORUM_API_KEY || "",
+        "x-api-key": process.env.FORU_MS_API_KEY || "",
       },
       body: JSON.stringify(body),
     })

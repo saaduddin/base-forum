@@ -1,30 +1,14 @@
-# Forum API integration
-
-*Automatically synced with your [v0.app](https://v0.app) deployments*
-
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/saaduddins-projects/v0-forum-api-integration)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/q8hy5gnHOq7)
+# Foru.ms Base Starter
 
 ## Overview
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+This is a Foru.ms starter bootstrapped with the minimal endpoints to get you started.
 
-## Deployment
+To obtain an API key, you need to create an account on [Foru.ms](https://foru.ms) and create a new instance. You can find the API key in the instance settings.
 
-Your project is live at:
+To learn more about Foru.ms, take a look at the following resources:
 
-**[https://vercel.com/saaduddins-projects/v0-forum-api-integration](https://vercel.com/saaduddins-projects/v0-forum-api-integration)**
-
-## Build your app
-
-Continue building your app on:
-
-**[https://v0.app/chat/q8hy5gnHOq7](https://v0.app/chat/q8hy5gnHOq7)**
-
-## How It Works
-
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+- [Foru.ms Documentation](https://foru.ms/docs) - learn about features and API.
+- [Blog](https://foru.ms/blog) - read the latest news and updates.
+- [GitHub](https://github.com/foru-ms) - check out the repositories.
+- [Support](https://foru.ms/support) - get support.

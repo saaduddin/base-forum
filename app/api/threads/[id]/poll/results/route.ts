@@ -7,7 +7,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const response = await fetch(`https://foru.ms/api/v1/thread/${id}/poll/results`, {
       headers: {
-        "x-api-key": process.env.FORUM_API_KEY || "",
+        "x-api-key": process.env.FORU_MS_API_KEY || "",
         ...(token && { Authorization: `Bearer ${token}` }),
       },
     })

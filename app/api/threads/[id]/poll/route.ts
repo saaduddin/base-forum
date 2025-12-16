@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params
-  const apiKey = process.env.FORUM_API_KEY
+  const apiKey = process.env.FORU_MS_API_KEY
 
   if (!apiKey) {
     return NextResponse.json({ error: "API key not configured" }, { status: 500 })

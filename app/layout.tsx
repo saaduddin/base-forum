@@ -5,12 +5,13 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { AuthProvider } from "@/lib/auth-context"
 import { Toaster } from "@/components/ui/toaster"
+import { ForuMsBadge } from "@/components/foru-ms-badge"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Community Forum - Connect, Discuss, Share",
+  title: "Customer Support/Community Forum",
   description:
     "Join our vibrant community forum to connect with like-minded individuals, share ideas, and engage in meaningful discussions on topics that matter to you.",
   generator: "v0.app",
@@ -43,6 +44,7 @@ export default function RootLayout({
       <body className={`font-sans antialiased`}>
         <AuthProvider>{children}</AuthProvider>
         <Toaster />
+        <ForuMsBadge />
         <Analytics />
       </body>
     </html>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Navbar } from "@/components/navbar"
+import { ForumHeader } from "@/components/forum-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -79,9 +79,10 @@ export default function MessagesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
+          <ForumHeader />
+
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold mb-2">Private Messages</h1>

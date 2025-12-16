@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Navbar } from "@/components/navbar"
+import { ForumHeader } from "@/components/forum-header"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ForumAPI } from "@/lib/api"
@@ -78,9 +78,10 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">
+          <ForumHeader />
+
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Notifications</h1>
             <p className="text-muted-foreground">Stay updated with your forum activity</p>

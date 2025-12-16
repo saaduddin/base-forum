@@ -10,7 +10,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const response = await fetch(`https://foru.ms/api/v1/threads/${id}/poll/votes`, {
+    const response = await fetch(`https://foru.ms/api/v1/thread/${id}/poll/votes`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const response = await fetch(`https://foru.ms/api/v1/threads/${id}/poll/votes`, {
+    const response = await fetch(`https://foru.ms/api/v1/thread/${id}/poll/votes`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -61,7 +61,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const response = await fetch(`https://foru.ms/api/v1/threads/${id}/poll/votes`, {
+    const response = await fetch(`https://foru.ms/api/v1/thread/${id}/poll/votes`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,

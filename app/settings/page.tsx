@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Navbar } from "@/components/navbar"
+import { ForumHeader } from "@/components/forum-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -92,10 +92,14 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Settings</h1>
+          <ForumHeader />
+
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold">Settings</h1>
+            <p className="text-muted-foreground mt-2">Manage your account settings and preferences</p>
+          </div>
 
           <Tabs defaultValue="profile" className="w-full">
             <TabsList className="grid w-full grid-cols-3">

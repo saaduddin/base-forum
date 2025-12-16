@@ -172,8 +172,14 @@ export class ForumAPI {
     userId?: string
     pinned?: boolean
     sort?: string
+    filter?: string
   }) {
-    const query = new URLSearchParams(params as any).toString()
+    const queryParams = { ...params }
+    if (queryParams.sort && !queryParams.filter) {
+      queryParams.filter = queryParams.sort
+      delete queryParams.sort
+    }
+    const query = new URLSearchParams(queryParams as any).toString()
     const res = await fetch(`/api/threads?${query}`)
     if (!res.ok) {
       const error = await res.json()
@@ -223,7 +229,24 @@ export class ForumAPI {
     userId?: string
     page?: number
     limit?: number
+    query?: string
+    cursor?: string
+    filter?: string
   }) {
+    // If threadId is provided, use the thread-specific endpoint
+    if (params?.threadId) {
+      const queryParams = new URLSearchParams()
+      if (params.query) queryParams.append("query", params.query)
+      if (params.cursor) queryParams.append("cursor", params.cursor)
+      if (params.filter) queryParams.append("filter", params.filter)
+
+      const queryString = queryParams.toString() ? `?${queryParams.toString()}` : ""
+      const res = await fetch(`/api/threads/${params.threadId}/posts${queryString}`)
+      if (!res.ok) throw new Error("Failed to fetch posts")
+      return res.json()
+    }
+
+    // Otherwise use the general posts endpoint
     const query = new URLSearchParams(params as any).toString()
     const res = await fetch(`/api/posts?${query}`)
     if (!res.ok) throw new Error("Failed to fetch posts")
@@ -265,21 +288,23 @@ export class ForumAPI {
     return res.json()
   }
 
-  static async dislikePost(id: string, token: string) {
-    const res = await fetch(`/api/posts/${id}/dislike`, {
-      method: "POST",
+  static async likePost(id: string, hasLiked: boolean, token: string) {
+    const method = hasLiked ? "DELETE" : "POST"
+    const res = await fetch(`/api/posts/${id}/like`, {
+      method,
       headers: this.getHeaders(token),
     })
-    if (!res.ok) throw new Error("Failed to dislike post")
+    if (!res.ok) throw new Error("Failed to like post")
     return res.json()
   }
 
-  static async removeDislikePost(id: string, token: string) {
+  static async dislikePost(id: string, hasDisliked: boolean, token: string) {
+    const method = hasDisliked ? "DELETE" : "POST"
     const res = await fetch(`/api/posts/${id}/dislike`, {
-      method: "DELETE",
+      method,
       headers: this.getHeaders(token),
     })
-    if (!res.ok) throw new Error("Failed to remove dislike")
+    if (!res.ok) throw new Error("Failed to dislike post")
     return res.json()
   }
 
@@ -406,16 +431,6 @@ export class ForumAPI {
     return res.json()
   }
 
-  static async likePost(id: string, dislike: boolean, token: string) {
-    const res = await fetch(`/api/posts/${id}/like`, {
-      method: "POST",
-      headers: this.getHeaders(token),
-      body: JSON.stringify({ dislike }),
-    })
-    if (!res.ok) throw new Error("Failed to like post")
-    return res.json()
-  }
-
   static async upvoteThread(id: string, downvote: boolean, token: string) {
     const res = await fetch(`/api/threads/${id}/upvote`, {
       method: "POST",
@@ -426,17 +441,10 @@ export class ForumAPI {
     return res.json()
   }
 
-  static async upvotePost(id: string, downvote: boolean, token: string) {
-    const res = await fetch(`/api/posts/${id}/upvote`, {
-      method: "POST",
-      headers: this.getHeaders(token),
-      body: JSON.stringify({ downvote }),
-    })
-    if (!res.ok) throw new Error("Failed to upvote post")
-    return res.json()
-  }
-
-  static async dislikeThread(id: string, token: string) {
+  static async dislikeThread(id: string, hasDisliked: boolean, token: string) {
+    if (hasDisliked) {
+      return this.removeDislikeThread(id, token)
+    }
     const res = await fetch(`/api/threads/${id}/dislike`, {
       method: "POST",
       headers: this.getHeaders(token),
@@ -454,7 +462,10 @@ export class ForumAPI {
     return res.json()
   }
 
-  static async downvoteThread(id: string, token: string) {
+  static async downvoteThread(id: string, hasDownvoted: boolean, token: string) {
+    if (hasDownvoted) {
+      return this.removeDownvoteThread(id, token)
+    }
     const res = await fetch(`/api/threads/${id}/downvote`, {
       method: "POST",
       headers: this.getHeaders(token),
@@ -619,14 +630,33 @@ export class ForumAPI {
   // Search
   static async search(params: {
     q: string
-    type?: string
-    page?: number
     limit?: number
   }) {
-    const query = new URLSearchParams(params as any).toString()
-    const res = await fetch(`/api/search?${query}`)
-    if (!res.ok) throw new Error("Failed to search")
-    return res.json()
+    const searchQuery = params.q
+    const limit = params.limit || 20
+
+    // Make parallel requests for each search type
+    const [threadsRes, postsRes, usersRes, tagsRes] = await Promise.allSettled([
+      fetch(`/api/search?query=${encodeURIComponent(searchQuery)}&type=threads&limit=${limit}`),
+      fetch(`/api/search?query=${encodeURIComponent(searchQuery)}&type=posts&limit=${limit}`),
+      fetch(`/api/search?query=${encodeURIComponent(searchQuery)}&type=users&limit=${limit}`),
+      fetch(`/api/search?query=${encodeURIComponent(searchQuery)}&type=tags&limit=${limit}`),
+    ])
+
+    const threads =
+      threadsRes.status === "fulfilled" && threadsRes.value.ok ? (await threadsRes.value.json()).threads || [] : []
+    const posts = postsRes.status === "fulfilled" && postsRes.value.ok ? (await postsRes.value.json()).posts || [] : []
+    const users = usersRes.status === "fulfilled" && usersRes.value.ok ? (await usersRes.value.json()).users || [] : []
+    const tags = tagsRes.status === "fulfilled" && tagsRes.value.ok ? (await tagsRes.value.json()).tags || [] : []
+
+    return {
+      results: {
+        threads,
+        posts,
+        users,
+        tags,
+      },
+    }
   }
 
   // Stats
@@ -722,6 +752,14 @@ export class ForumAPI {
   }
 
   // Polls
+  static async getPoll(threadId: string, token?: string) {
+    const res = await fetch(`/api/threads/${threadId}/poll`, {
+      headers: this.getHeaders(token),
+    })
+    if (!res.ok) throw new Error("Failed to fetch poll")
+    return res.json()
+  }
+
   static async getPollResults(threadId: string, token?: string) {
     const res = await fetch(`/api/threads/${threadId}/poll/results`, {
       headers: this.getHeaders(token),

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
-import { Navbar } from "@/components/navbar"
+import { ForumHeader } from "@/components/forum-header"
 import { ThreadCard } from "@/components/thread-card"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -16,7 +16,7 @@ export default function SearchPage() {
   const searchParams = useSearchParams()
   const initialQuery = searchParams.get("q") || ""
   const [query, setQuery] = useState(initialQuery)
-  const [results, setResults] = useState<any>({ threads: [], posts: [], users: [] })
+  const [results, setResults] = useState<any>({ threads: [], posts: [], users: [], tags: [] })
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
 
@@ -27,7 +27,7 @@ export default function SearchPage() {
       setIsLoading(true)
       try {
         const data = await ForumAPI.search({ q: query, limit: 20 })
-        setResults(data.results || { threads: [], posts: [], users: [] })
+        setResults(data.results || { threads: [], posts: [], users: [], tags: [] })
       } catch (error) {
         console.error("Search failed:", error)
       } finally {
@@ -39,13 +39,18 @@ export default function SearchPage() {
     return () => clearTimeout(timer)
   }, [query])
 
-  const totalResults = (results.threads?.length || 0) + (results.posts?.length || 0) + (results.users?.length || 0)
+  const totalResults =
+    (results.threads?.length || 0) +
+    (results.posts?.length || 0) +
+    (results.users?.length || 0) +
+    (results.tags?.length || 0)
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
+          <ForumHeader />
+
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-4">Search</h1>
             <div className="relative">
@@ -90,6 +95,7 @@ export default function SearchPage() {
                   <TabsTrigger value="threads">Threads ({results.threads?.length || 0})</TabsTrigger>
                   <TabsTrigger value="posts">Posts ({results.posts?.length || 0})</TabsTrigger>
                   <TabsTrigger value="users">Users ({results.users?.length || 0})</TabsTrigger>
+                  <TabsTrigger value="tags">Tags ({results.tags?.length || 0})</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="all" className="mt-6 space-y-6">
@@ -127,6 +133,52 @@ export default function SearchPage() {
                       </div>
                     </div>
                   )}
+
+                  {results.posts?.length > 0 && (
+                    <div>
+                      <h2 className="text-lg font-semibold mb-3">Posts</h2>
+                      <div className="space-y-3">
+                        {results.posts.map((post: any) => (
+                          <Card key={post.id}>
+                            <CardContent className="py-4">
+                              <Link href={`/thread/${post.threadId}`} className="hover:underline">
+                                <p className="line-clamp-3">{post.body}</p>
+                                <p className="text-sm text-muted-foreground mt-2">
+                                  Posted {new Date(post.createdAt).toLocaleDateString()}
+                                </p>
+                              </Link>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {results.tags?.length > 0 && (
+                    <div>
+                      <h2 className="text-lg font-semibold mb-3">Tags</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {results.tags.map((tag: any) => (
+                          <Link key={tag.id} href={`/tags?tag=${tag.name}`}>
+                            <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+                              <CardContent className="py-4">
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className="w-3 h-3 rounded-full"
+                                    style={{ backgroundColor: tag.color || "#6366f1" }}
+                                  />
+                                  <p className="font-semibold">{tag.name}</p>
+                                </div>
+                                {tag.description && (
+                                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{tag.description}</p>
+                                )}
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="threads" className="mt-6">
@@ -138,8 +190,25 @@ export default function SearchPage() {
                 </TabsContent>
 
                 <TabsContent value="posts" className="mt-6">
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Post search results coming soon</p>
+                  <div className="space-y-3">
+                    {results.posts?.length > 0 ? (
+                      results.posts.map((post: any) => (
+                        <Card key={post.id}>
+                          <CardContent className="py-4">
+                            <Link href={`/thread/${post.threadId}`} className="hover:underline">
+                              <p className="line-clamp-3">{post.body}</p>
+                              <p className="text-sm text-muted-foreground mt-2">
+                                Posted {new Date(post.createdAt).toLocaleDateString()}
+                              </p>
+                            </Link>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>No posts found</p>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 
@@ -161,6 +230,35 @@ export default function SearchPage() {
                         </Card>
                       </Link>
                     ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="tags" className="mt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {results.tags?.length > 0 ? (
+                      results.tags.map((tag: any) => (
+                        <Link key={tag.id} href={`/tags?tag=${tag.name}`}>
+                          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+                            <CardContent className="py-4">
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="w-3 h-3 rounded-full"
+                                  style={{ backgroundColor: tag.color || "#6366f1" }}
+                                />
+                                <p className="font-semibold">{tag.name}</p>
+                              </div>
+                              {tag.description && (
+                                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{tag.description}</p>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground col-span-2">
+                        <p>No tags found</p>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>

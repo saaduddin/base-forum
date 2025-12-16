@@ -12,19 +12,23 @@ import { Check } from "lucide-react"
 
 interface PollWidgetProps {
   threadId: string
+  poll?: any
 }
 
-export function PollWidget({ threadId }: PollWidgetProps) {
+export function PollWidget({ threadId, poll }: PollWidgetProps) {
   const { token } = useAuth()
   const { toast } = useToast()
   const [pollResults, setPollResults] = useState<any>(null)
   const [selectedOption, setSelectedOption] = useState<string>("")
   const [hasVoted, setHasVoted] = useState(false)
   const [isVoting, setIsVoting] = useState(false)
+  const [isChangingVote, setIsChangingVote] = useState(false)
 
   useEffect(() => {
-    loadPollResults()
-  }, [threadId])
+    if (poll) {
+      loadPollResults()
+    }
+  }, [threadId, poll])
 
   const loadPollResults = async () => {
     try {
@@ -36,8 +40,8 @@ export function PollWidget({ threadId }: PollWidgetProps) {
         setHasVoted(true)
         setSelectedOption(results.userVote.optionId)
       }
-    } catch (error) {
-      console.error("Failed to load poll results:", error)
+    } catch (error: any) {
+      // Silently fail for poll fetching errors
     }
   }
 
@@ -46,14 +50,10 @@ export function PollWidget({ threadId }: PollWidgetProps) {
 
     setIsVoting(true)
     try {
-      if (hasVoted) {
-        await ForumAPI.updatePollVote(threadId, selectedOption, token)
-        toast({ title: "Vote updated!" })
-      } else {
-        await ForumAPI.votePoll(threadId, selectedOption, token)
-        toast({ title: "Vote cast!" })
-      }
+      await ForumAPI.updatePollVote(threadId, selectedOption, token)
+      toast({ title: hasVoted ? "Vote updated!" : "Vote cast!" })
       setHasVoted(true)
+      setIsChangingVote(false)
       loadPollResults()
     } catch (error) {
       toast({ title: "Failed to vote", variant: "destructive" })
@@ -63,12 +63,14 @@ export function PollWidget({ threadId }: PollWidgetProps) {
   }
 
   const handleChangeVote = async () => {
-    setHasVoted(false)
+    setIsChangingVote(true)
   }
+
+  if (!poll) return null
 
   if (!pollResults) return null
 
-  const totalVotes = pollResults.options?.reduce((sum: number, opt: any) => sum + (opt._count?.votes || 0), 0) || 0
+  const totalVotes = pollResults.options?.reduce((sum: number, opt: any) => sum + (opt.votes || 0), 0) || 0
 
   return (
     <Card>
@@ -76,10 +78,10 @@ export function PollWidget({ threadId }: PollWidgetProps) {
         <CardTitle className="text-lg">{pollResults.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {hasVoted ? (
+        {hasVoted && !isChangingVote ? (
           <div className="space-y-2">
             {pollResults.options?.map((option: any) => {
-              const votes = option._count?.votes || 0
+              const votes = option.votes || 0
               const percentage = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0
               const isSelected = option.id === selectedOption
 
@@ -128,9 +130,16 @@ export function PollWidget({ threadId }: PollWidgetProps) {
                 </div>
               ))}
             </RadioGroup>
-            <Button onClick={handleVote} disabled={!selectedOption || isVoting} className="w-full">
-              {isVoting ? "Voting..." : "Cast Vote"}
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleVote} disabled={!selectedOption || isVoting} className="flex-1">
+                {isVoting ? "Voting..." : hasVoted ? "Update Vote" : "Cast Vote"}
+              </Button>
+              {isChangingVote && (
+                <Button variant="outline" onClick={() => setIsChangingVote(false)}>
+                  Cancel
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </CardContent>

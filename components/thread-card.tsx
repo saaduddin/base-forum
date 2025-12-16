@@ -21,13 +21,19 @@ interface Thread {
   }
   tags?: Array<{ id: string; name: string; color: string }>
   createdAt: string
+  Post?: any[] // API returns 'Post' (capital P) as the posts array
+  posts?: any[] // Fallback for compatibility
+  likes?: Array<{ id: string; userId: string; dislike?: boolean }>
   _count?: {
-    posts: number
-    upvotes: number
+    Post?: number // API may return _count.Post
+    posts?: number
   }
 }
 
 export function ThreadCard({ thread }: { thread: Thread }) {
+  const postsCount = thread._count?.Post || thread._count?.posts || thread.Post?.length || thread.posts?.length || 0
+  const likesCount = thread.likes?.filter((l) => !l.dislike).length || 0
+
   return (
     <Card className="hover:border-primary/50 transition-colors">
       <CardHeader className="pb-3">
@@ -78,11 +84,11 @@ export function ThreadCard({ thread }: { thread: Thread }) {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1 text-muted-foreground">
             <MessageSquare className="h-4 w-4" />
-            <span>{thread._count?.posts || 0}</span>
+            <span>{postsCount}</span>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
             <ThumbsUp className="h-4 w-4" />
-            <span>{thread._count?.upvotes || 0}</span>
+            <span>{likesCount}</span>
           </div>
         </div>
       </CardFooter>

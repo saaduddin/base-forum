@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Navbar } from "@/components/navbar"
+import { ForumHeader } from "@/components/forum-header"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -82,10 +82,12 @@ export function UserProfileContent({ userId }: { userId: string }) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <main className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="max-w-5xl mx-auto">
+            <ForumHeader />
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
           </div>
         </main>
       </div>
@@ -95,10 +97,12 @@ export function UserProfileContent({ userId }: { userId: string }) {
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <main className="container mx-auto px-4 py-8">
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">User not found</p>
+          <div className="max-w-5xl mx-auto">
+            <ForumHeader />
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">User not found</p>
+            </div>
           </div>
         </main>
       </div>
@@ -109,9 +113,10 @@ export function UserProfileContent({ userId }: { userId: string }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
+          <ForumHeader />
+
           <Card className="mb-6">
             <CardHeader>
               <div className="flex items-start justify-between">

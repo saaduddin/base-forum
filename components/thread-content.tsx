@@ -3,16 +3,17 @@
 import { useEffect, useState } from "react"
 import { PostCard } from "@/components/post-card"
 import { ReplyForm } from "@/components/reply-form"
-import { PollWidget } from "@/components/poll-widget"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ForumAPI } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
-import { Loader2, ThumbsUp, ThumbsDown, Lock, Pin, ArrowLeft, Heart } from "lucide-react"
+import { Loader2, ThumbsDown, Lock, Pin, ArrowLeft, Heart } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { useRouter } from "next/navigation"
+import { PollWidget } from "@/components/poll-widget"
+import { ForumHeader } from "@/components/forum-header"
 
 export function ThreadContent({ threadId }: { threadId: string }) {
   const router = useRouter()
@@ -38,33 +39,16 @@ export function ThreadContent({ threadId }: { threadId: string }) {
   }
 
   useEffect(() => {
+    setPosts([])
+    setThread(null)
     loadThread()
   }, [threadId])
-
-  const handleUpvote = async () => {
-    if (!token) return
-    try {
-      await ForumAPI.upvoteThread(threadId, false, token)
-      loadThread()
-    } catch (error) {
-      console.error("Failed to upvote")
-    }
-  }
-
-  const handleDownvote = async () => {
-    if (!token) return
-    try {
-      await ForumAPI.downvoteThread(threadId, token)
-      loadThread()
-    } catch (error) {
-      console.error("Failed to downvote")
-    }
-  }
 
   const handleLike = async () => {
     if (!token) return
     try {
-      await ForumAPI.likeThread(threadId, false, token)
+      const hasLiked = thread.likes?.some((l: any) => l.userId === user?.id && !l.dislike)
+      await ForumAPI.likeThread(threadId, hasLiked, token)
       loadThread()
     } catch (error) {
       console.error("Failed to like")
@@ -74,7 +58,8 @@ export function ThreadContent({ threadId }: { threadId: string }) {
   const handleDislike = async () => {
     if (!token) return
     try {
-      await ForumAPI.dislikeThread(threadId, token)
+      const hasDisliked = thread.likes?.some((l: any) => l.userId === user?.id && l.dislike)
+      await ForumAPI.dislikeThread(threadId, hasDisliked, token)
       loadThread()
     } catch (error) {
       console.error("Failed to dislike")
@@ -106,9 +91,17 @@ export function ThreadContent({ threadId }: { threadId: string }) {
 
   const isThreadOwner = user?.id === thread.user?.id
 
+  const likesCount = thread.likes?.filter((l: any) => !l.dislike).length || 0
+  const dislikesCount = thread.likes?.filter((l: any) => l.dislike).length || 0
+
+  const hasLiked = thread.likes?.some((l: any) => l.userId === user?.id && !l.dislike)
+  const hasDisliked = thread.likes?.some((l: any) => l.userId === user?.id && l.dislike)
+
   return (
     <main className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
+        <ForumHeader />
+
         <Button variant="ghost" className="mb-4" onClick={() => router.push("/")}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to threads
@@ -152,28 +145,24 @@ export function ThreadContent({ threadId }: { threadId: string }) {
           <CardContent>
             <p className="whitespace-pre-wrap mb-4">{thread.body}</p>
 
+            {thread.poll && (
+              <div className="mb-4">
+                <PollWidget threadId={threadId} poll={thread.poll} />
+              </div>
+            )}
+
             <div className="flex items-center gap-2 pt-4 border-t">
-              <Button variant="outline" size="sm" onClick={handleUpvote}>
-                <ThumbsUp className="h-4 w-4 mr-1" />
-                {thread._count?.upvotes || 0}
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleDownvote}>
-                <ThumbsDown className="h-4 w-4 mr-1" />
-                {thread._count?.downvotes || 0}
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleLike}>
+              <Button variant={hasLiked ? "default" : "outline"} size="sm" onClick={handleLike}>
                 <Heart className="h-4 w-4 mr-1" />
-                {thread._count?.likes || 0}
+                {likesCount}
+              </Button>
+              <Button variant={hasDisliked ? "default" : "outline"} size="sm" onClick={handleDislike}>
+                <ThumbsDown className="h-4 w-4 mr-1" />
+                {dislikesCount}
               </Button>
             </div>
           </CardContent>
         </Card>
-
-        {thread.poll && (
-          <div className="mb-6">
-            <PollWidget threadId={threadId} />
-          </div>
-        )}
 
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-4">{posts.length} Replies</h2>

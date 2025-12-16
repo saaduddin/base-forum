@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Navbar } from "@/components/navbar"
+import { ForumHeader } from "@/components/forum-header"
 import { ThreadCard } from "@/components/thread-card"
 import { CreateThreadDialog } from "@/components/create-thread-dialog"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -13,12 +13,12 @@ export default function HomePage() {
   const { user } = useAuth()
   const [threads, setThreads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [sort, setSort] = useState("latest")
+  const [filter, setFilter] = useState("latest")
 
   const loadThreads = async () => {
     setIsLoading(true)
     try {
-      const data = await ForumAPI.getThreads({ sort, limit: 20 })
+      const data = await ForumAPI.getThreads({ filter, limit: 20 })
       setThreads(data.threads || [])
     } catch (error) {
       console.error("Failed to load threads:", error)
@@ -29,13 +29,14 @@ export default function HomePage() {
 
   useEffect(() => {
     loadThreads()
-  }, [sort])
+  }, [filter])
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
+          <ForumHeader />
+
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold mb-2">Discussions</h1>
@@ -45,7 +46,7 @@ export default function HomePage() {
           </div>
 
           <div className="mb-6">
-            <Tabs value={sort} onValueChange={setSort}>
+            <Tabs value={filter} onValueChange={setFilter}>
               <TabsList>
                 <TabsTrigger value="latest">Latest</TabsTrigger>
                 <TabsTrigger value="popular">Popular</TabsTrigger>

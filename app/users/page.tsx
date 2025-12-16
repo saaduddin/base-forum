@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Navbar } from "@/components/navbar"
+import { ForumHeader } from "@/components/forum-header"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -32,9 +32,10 @@ export default function UsersPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
+          <ForumHeader />
+
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Community Members</h1>
             <p className="text-muted-foreground mb-4">Connect with other forum members</p>

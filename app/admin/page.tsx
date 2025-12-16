@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Navbar } from "@/components/navbar"
+import { ForumHeader } from "@/components/forum-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -81,9 +81,10 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
+          <ForumHeader />
+
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
             <p className="text-muted-foreground">Manage your forum and view analytics</p>

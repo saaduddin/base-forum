@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { ThumbsUp, ThumbsDown, MoreVertical, Flag, CheckCircle, Heart } from "lucide-react"
+import { MoreVertical, Flag, CheckCircle, Heart, ThumbsDown } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { formatDistanceToNow } from "date-fns"
 import { useAuth } from "@/lib/auth-context"
@@ -24,16 +24,11 @@ interface Post {
     avatar?: string
   }
   createdAt: string
-  upvotes?: any[]
-  downvotes?: any[]
-  likes?: any[]
-  dislikes?: any[]
-  _count?: {
-    upvotes?: number
-    downvotes?: number
-    likes?: number
-    dislikes?: number
-  }
+  likes?: Array<{
+    id: string
+    userId: string
+    dislike?: boolean
+  }>
 }
 
 export function PostCard({
@@ -51,49 +46,34 @@ export function PostCard({
   const { toast } = useToast()
   const [isVoting, setIsVoting] = useState(false)
 
-  const handleUpvote = async () => {
-    if (!token) return
-    setIsVoting(true)
-    try {
-      await ForumAPI.upvotePost(post.id, false, token)
-      onUpdate?.()
-    } catch (error) {
-      toast({ title: "Failed to upvote", variant: "destructive" })
-    } finally {
-      setIsVoting(false)
-    }
-  }
-
-  const handleDownvote = async () => {
-    if (!token) return
-    setIsVoting(true)
-    try {
-      await ForumAPI.downvotePost(post.id, token)
-      onUpdate?.()
-    } catch (error) {
-      toast({ title: "Failed to downvote", variant: "destructive" })
-    } finally {
-      setIsVoting(false)
-    }
-  }
+  const likesCount = post.likes?.filter((l) => !l.dislike).length || 0
+  const dislikesCount = post.likes?.filter((l) => l.dislike).length || 0
+  const hasLiked = post.likes?.some((l) => l.userId === user?.id && !l.dislike)
+  const hasDisliked = post.likes?.some((l) => l.userId === user?.id && l.dislike)
 
   const handleLike = async () => {
-    if (!token) return
+    if (!token || isVoting) return
+    setIsVoting(true)
     try {
-      await ForumAPI.likePost(post.id, false, token)
+      await ForumAPI.likePost(post.id, hasLiked, token)
       onUpdate?.()
     } catch (error) {
       toast({ title: "Failed to like", variant: "destructive" })
+    } finally {
+      setIsVoting(false)
     }
   }
 
   const handleDislike = async () => {
-    if (!token) return
+    if (!token || isVoting) return
+    setIsVoting(true)
     try {
-      await ForumAPI.dislikePost(post.id, token)
+      await ForumAPI.dislikePost(post.id, hasDisliked, token)
       onUpdate?.()
     } catch (error) {
       toast({ title: "Failed to dislike", variant: "destructive" })
+    } finally {
+      setIsVoting(false)
     }
   }
 
@@ -182,21 +162,13 @@ export function PostCard({
         <p className="text-sm whitespace-pre-wrap">{post.body}</p>
       </CardContent>
       <CardFooter className="pt-3 flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={handleUpvote} disabled={isVoting}>
-          <ThumbsUp className="h-4 w-4 mr-1" />
-          {post._count?.upvotes || post.upvotes?.length || 0}
-        </Button>
-        <Button variant="ghost" size="sm" onClick={handleDownvote} disabled={isVoting}>
-          <ThumbsDown className="h-4 w-4 mr-1" />
-          {post._count?.downvotes || post.downvotes?.length || 0}
-        </Button>
-        <Button variant="ghost" size="sm" onClick={handleLike}>
+        <Button variant={hasLiked ? "default" : "outline"} size="sm" onClick={handleLike} disabled={isVoting}>
           <Heart className="h-4 w-4 mr-1" />
-          {post._count?.likes || post.likes?.length || 0}
+          {likesCount}
         </Button>
-        <Button variant="ghost" size="sm" onClick={handleDislike}>
+        <Button variant={hasDisliked ? "default" : "outline"} size="sm" onClick={handleDislike} disabled={isVoting}>
           <ThumbsDown className="h-4 w-4 mr-1" />
-          {post._count?.dislikes || post.dislikes?.length || 0}
+          {dislikesCount}
         </Button>
       </CardFooter>
     </Card>

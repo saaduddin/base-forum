@@ -6,7 +6,7 @@ const API_KEY = process.env.FORUM_API_KEY
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
-    const sort = searchParams.get("sort") || "latest"
+    const filter = searchParams.get("filter") || searchParams.get("sort") || "latest"
     const page = searchParams.get("page") || "1"
     const limit = searchParams.get("limit") || "20"
     const tagId = searchParams.get("tagId")
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const pinned = searchParams.get("pinned")
 
     const params = new URLSearchParams({
-      sort,
+      filter,
       page,
       limit,
     })

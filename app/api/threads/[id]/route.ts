@@ -3,9 +3,9 @@ import { type NextRequest, NextResponse } from "next/server"
 const API_BASE = "https://foru.ms/api/v1"
 const API_KEY = process.env.FORU_MS_API_KEY
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const res = await fetch(`${API_BASE}/thread/${id}`, {
       headers: {
@@ -27,9 +27,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
     const token = request.headers.get("authorization")?.replace("Bearer ", "")
 
     if (!token) {
@@ -60,9 +60,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
     const token = request.headers.get("authorization")?.replace("Bearer ", "")
 
     if (!token) {

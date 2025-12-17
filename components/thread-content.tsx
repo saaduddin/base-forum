@@ -99,7 +99,7 @@ export function ThreadContent({ threadId }: { threadId: string }) {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <ForumHeader />
 
         <Button variant="ghost" className="mb-4" onClick={() => router.push("/")}>

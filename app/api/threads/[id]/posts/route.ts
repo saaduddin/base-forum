@@ -3,9 +3,9 @@ import { type NextRequest, NextResponse } from "next/server"
 const API_BASE = "https://foru.ms/api/v1"
 const API_KEY = process.env.FORU_MS_API_KEY
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
     const searchParams = request.nextUrl.searchParams
     const queryParams = new URLSearchParams()
 

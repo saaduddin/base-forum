@@ -3,15 +3,16 @@ import { type NextRequest, NextResponse } from "next/server"
 const API_BASE = "https://foru.ms/api/v1"
 const API_KEY = process.env.FORU_MS_API_KEY
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const token = request.headers.get("authorization")?.replace("Bearer ", "")
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const response = await fetch(`${API_BASE}/notification/${params.id}/read`, {
+    const response = await fetch(`${API_BASE}/notification/${id}/read`, {
       method: "PUT",
       headers: {
         "x-api-key": API_KEY!,

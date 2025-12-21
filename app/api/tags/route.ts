@@ -1,14 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const API_BASE = "https://foru.ms/api/v1"
+const API_URL = process.env.FORU_MS_API_URL
 const API_KEY = process.env.FORU_MS_API_KEY
 
 export async function GET() {
   try {
-    const res = await fetch(`${API_BASE}/tags`, {
+    const res = await fetch(`${API_URL}/tags`, {
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": API_KEY || "",
+        "x-api-key": API_KEY!,
       },
       cache: "no-store",
     })
@@ -30,11 +30,11 @@ export async function POST(request: NextRequest) {
     const token = request.headers.get("authorization")?.replace("Bearer ", "")
     const body = await request.json()
 
-    const res = await fetch(`${API_BASE}/tags`, {
+    const res = await fetch(`${API_URL}/tags`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": API_KEY || "",
+        "x-api-key": API_KEY!,
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify(body),

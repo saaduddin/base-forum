@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const API_BASE = "https://foru.ms/api/v1"
+const API_URL = process.env.FORU_MS_API_URL
 const API_KEY = process.env.FORU_MS_API_KEY
 
 export async function GET(request: NextRequest) {
@@ -12,10 +12,10 @@ export async function GET(request: NextRequest) {
     if (searchParams.get("limit")) params.append("limit", searchParams.get("limit")!)
     if (searchParams.get("search")) params.append("search", searchParams.get("search")!)
 
-    const res = await fetch(`${API_BASE}/users?${params.toString()}`, {
+    const res = await fetch(`${API_URL}/users?${params.toString()}`, {
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": API_KEY || "",
+        "x-api-key": API_KEY!,
       },
       cache: "no-store",
     })

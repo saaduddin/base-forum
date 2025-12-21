@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const API_BASE = "https://foru.ms/api/v1"
+const API_URL = process.env.FORU_MS_API_URL
 const API_KEY = process.env.FORU_MS_API_KEY
 
 export async function GET(request: NextRequest) {
@@ -11,10 +11,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "No token provided" }, { status: 401 })
     }
 
-    const res = await fetch(`${API_BASE}/auth/me`, {
+    const res = await fetch(`${API_URL}/auth/me`, {
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": API_KEY || "",
+        "x-api-key": API_KEY!,
         Authorization: `Bearer ${token}`,
       },
     })

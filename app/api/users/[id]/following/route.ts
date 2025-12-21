@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const API_BASE = "https://foru.ms/api/v1"
+const API_URL = process.env.FORU_MS_API_URL
 const API_KEY = process.env.FORU_MS_API_KEY
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const cursor = searchParams.get("cursor")
     const filter = searchParams.get("filter")
 
-    const url = new URL(`${API_BASE}/user/${id}/following`)
+    const url = new URL(`${API_URL}/user/${id}/following`)
     if (query) url.searchParams.set("query", query)
     if (cursor) url.searchParams.set("cursor", cursor)
     if (filter) url.searchParams.set("filter", filter)
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const res = await fetch(url.toString(), {
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": API_KEY || "",
+        "x-api-key": API_KEY!,
       },
       cache: "no-store",
     })

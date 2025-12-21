@@ -15,25 +15,8 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Customer Support/Community Forum",
   description:
-    "Join our vibrant community forum to connect with like-minded individuals, share ideas, and engage in meaningful discussions on topics that matter to you.",
-  generator: "v0.app",
-  icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    apple: "/apple-icon.png",
-  },
+    "A modern, privacy-focused forum solution for customer support and community building.",
+  generator: "Next.js",
 }
 
 export default function RootLayout({

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const API_BASE = "https://foru.ms/api/v1"
+const API_URL = process.env.FORU_MS_API_URL
 const API_KEY = process.env.FORU_MS_API_KEY
 
 export async function GET(request: NextRequest) {
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const queryString = searchParams.toString()
 
-    const response = await fetch(`${API_BASE}/search?${queryString}`, {
+    const response = await fetch(`${API_URL}/search?${queryString}`, {
       headers: {
         "x-api-key": API_KEY!,
       },

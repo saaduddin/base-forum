@@ -1,13 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+const API_URL = process.env.FORU_MS_API_URL
+const API_KEY = process.env.FORU_MS_API_KEY
+
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
     const token = request.headers.get("Authorization")?.replace("Bearer ", "")
 
-    const response = await fetch(`https://foru.ms/api/v1/thread/${id}/poll/results`, {
+    const response = await fetch(`${API_URL}/thread/${id}/poll/results`, {
       headers: {
-        "x-api-key": process.env.FORU_MS_API_KEY || "",
+        "x-api-key": API_KEY!,
         ...(token && { Authorization: `Bearer ${token}` }),
       },
     })
@@ -20,7 +23,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     if (!response.ok) {
       console.error(
-        `[SERVER] fetch to https://foru.ms/api/v1/thread/${id}/poll/results failed with status ${response.status} and body:`,
+        `[SERVER] fetch to ${API_URL}/thread/${id}/poll/results failed with status ${response.status} and body:`,
         JSON.stringify(data),
       )
     }

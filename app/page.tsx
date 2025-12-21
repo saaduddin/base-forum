@@ -40,7 +40,9 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold mb-2">Customer Support/Community Forum</h1>
-              <p className="text-muted-foreground">Join the conversation with our community</p>
+              <p className="text-muted-foreground">
+                A modern, privacy-focused forum solution for customer support and community building.
+              </p>
             </div>
             {user && <CreateThreadDialog onSuccess={loadThreads} />}
           </div>

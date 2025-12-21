@@ -1,14 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+const API_URL = process.env.FORU_MS_API_URL
+const API_KEY = process.env.FORU_MS_API_KEY
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    const response = await fetch("https://foru.ms/api/v1/auth/forgot-password", {
+    const response = await fetch(`${API_URL}/auth/forgot-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.FORU_MS_API_KEY || "",
+        "x-api-key": API_KEY!,
       },
       body: JSON.stringify(body),
     })

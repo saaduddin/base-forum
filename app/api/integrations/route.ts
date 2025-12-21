@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const API_BASE = "https://foru.ms/api/v1"
+const API_URL = process.env.FORU_MS_API_URL
 const API_KEY = process.env.FORU_MS_API_KEY
 
 export async function GET(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const response = await fetch(`${API_BASE}/integrations`, {
+    const response = await fetch(`${API_URL}/integrations`, {
       headers: {
         "x-api-key": API_KEY!,
         Authorization: `Bearer ${token}`,
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
 
-    const response = await fetch(`${API_BASE}/integrations`, {
+    const response = await fetch(`${API_URL}/integrations`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const API_BASE = "https://foru.ms/api/v1"
+const API_URL = process.env.FORU_MS_API_URL
 const API_KEY = process.env.FORU_MS_API_KEY
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const body = await request.json()
 
-    const res = await fetch(`${API_BASE}/post/${id}/likes`, {
+    const res = await fetch(`${API_URL}/post/${id}/likes`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -44,7 +44,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    const res = await fetch(`${API_BASE}/post/${id}/likes`, {
+    const res = await fetch(`${API_URL}/post/${id}/likes`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,

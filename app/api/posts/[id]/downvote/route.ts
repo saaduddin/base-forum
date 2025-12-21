@@ -1,5 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+const API_URL = process.env.FORU_MS_API_URL
+const API_KEY = process.env.FORU_MS_API_KEY
+
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
@@ -10,7 +13,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const response = await fetch(`https://foru.ms/api/v1/post/${id}/downvotes`, {
+    const response = await fetch(`${API_URL}/post/${id}/downvotes`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,7 +38,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const response = await fetch(`https://foru.ms/api/v1/post/${id}/downvotes`, {
+    const response = await fetch(`${API_URL}/post/${id}/downvotes`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const API_BASE = "https://foru.ms/api/v1"
+const API_URL = process.env.FORU_MS_API_URL
 const API_KEY = process.env.FORU_MS_API_KEY
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -12,10 +12,10 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    const res = await fetch(`${API_BASE}/webhooks/${id}`, {
+    const res = await fetch(`${API_URL}/webhooks/${id}`, {
       method: "DELETE",
       headers: {
-        "x-api-key": API_KEY || "",
+        "x-api-key": API_KEY!,
         Authorization: `Bearer ${token}`,
       },
     })

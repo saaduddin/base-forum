@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const API_BASE = "https://foru.ms/api/v1"
+const API_URL = process.env.FORU_MS_API_URL
 const API_KEY = process.env.FORU_MS_API_KEY
 
 export async function GET(request: NextRequest) {
@@ -23,10 +23,10 @@ export async function GET(request: NextRequest) {
     if (userId) params.append("userId", userId)
     if (pinned) params.append("pinned", pinned)
 
-    const res = await fetch(`${API_BASE}/threads?${params.toString()}`, {
+    const res = await fetch(`${API_URL}/threads?${params.toString()}`, {
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": API_KEY || "",
+        "x-api-key": API_KEY!,
       },
       cache: "no-store",
     })
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
 
-    const res = await fetch(`${API_BASE}/thread`, {
+    const res = await fetch(`${API_URL}/thread`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     const responseText = await res.text()
 
     if (!res.ok) {
-      console.error(`[SERVER] fetch to ${API_BASE}/thread failed with status ${res.status} and body: ${responseText}`)
+      console.error(`[SERVER] fetch to ${API_URL}/thread failed with status ${res.status} and body: ${responseText}`)
       return NextResponse.json({ error: "Failed to create thread", details: responseText }, { status: res.status })
     }
 

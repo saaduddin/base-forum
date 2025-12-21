@@ -1,5 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+const API_URL = process.env.FORU_MS_API_URL
+const API_KEY = process.env.FORU_MS_API_KEY
+
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
@@ -11,12 +14,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const url = new URL(`https://foru.ms/api/v1/webhooks/${id}/deliveries`)
+    const url = new URL(`${API_URL}/webhooks/${id}/deliveries`)
     if (cursor) url.searchParams.set("cursor", cursor)
 
     const response = await fetch(url.toString(), {
       headers: {
-        "x-api-key": process.env.FORU_MS_API_KEY || "",
+        "x-api-key": API_KEY!,
         Authorization: `Bearer ${token}`,
       },
     })

@@ -1,17 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+const API_URL = process.env.FORU_MS_API_URL
+const API_KEY = process.env.FORU_MS_API_KEY
+
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params
-  const apiKey = process.env.FORU_MS_API_KEY
-
-  if (!apiKey) {
-    return NextResponse.json({ error: "API key not configured" }, { status: 500 })
-  }
 
   try {
-    const response = await fetch(`https://foru.ms/api/v1/thread/${id}/poll`, {
+    const response = await fetch(`${API_URL}/thread/${id}/poll`, {
       headers: {
-        "x-api-key": apiKey,
+        "x-api-key": API_KEY!,
       },
     })
 

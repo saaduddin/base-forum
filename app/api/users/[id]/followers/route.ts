@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const API_BASE = "https://foru.ms/api/v1"
+const API_URL = process.env.FORU_MS_API_URL
 const API_KEY = process.env.FORU_MS_API_KEY
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -10,14 +10,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const query = searchParams.get("query")
     const cursor = searchParams.get("cursor")
 
-    const url = new URL(`${API_BASE}/user/${id}/followers`)
+    const url = new URL(`${API_URL}/user/${id}/followers`)
     if (query) url.searchParams.set("query", query)
     if (cursor) url.searchParams.set("cursor", cursor)
 
     const res = await fetch(url.toString(), {
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": API_KEY || "",
+        "x-api-key": API_KEY!,
       },
       cache: "no-store",
     })
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const body = await request.json()
 
-    const res = await fetch(`${API_BASE}/user/${id}/followers`, {
+    const res = await fetch(`${API_URL}/user/${id}/followers`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    const res = await fetch(`${API_BASE}/user/${id}/followers`, {
+    const res = await fetch(`${API_URL}/user/${id}/followers`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,

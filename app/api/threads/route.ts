@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
       limit: parseInt(limit),
       filter: filter as 'newest' | 'oldest',
       ...(tagId && { tagId }),
+      ...(userId && { userId }),
     })
     return NextResponse.json(data, {
       headers: { "Cache-Control": `public, s-maxage=${revalidate}, stale-while-revalidate=${revalidate}` },

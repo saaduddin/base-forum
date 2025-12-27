@@ -195,7 +195,7 @@ export function ThreadContent({ threadId }: { threadId: string }) {
 
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-4">
-            {posts.length} {nextCursor ? '+' : ''} Replies
+            {posts.length}{nextCursor ? '+' : ''} Posts
           </h2>
 
           {user && !thread.locked && (
@@ -225,7 +225,7 @@ export function ThreadContent({ threadId }: { threadId: string }) {
                     Loading...
                   </>
                 ) : (
-                  "Load More Replies"
+                  "Load More Posts"
                 )}
               </Button>
             </div>
@@ -233,10 +233,10 @@ export function ThreadContent({ threadId }: { threadId: string }) {
 
           {posts.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">No replies yet. Be the first to respond!</p>
+              <p className="text-muted-foreground mb-4">No posts yet. Be the first to respond!</p>
               {!user && (
                 <Button variant="outline" onClick={openAuthDialog}>
-                  Sign in to reply
+                  Sign in to post a reply
                 </Button>
               )}
             </div>

@@ -168,6 +168,7 @@ export class ForumAPI {
   static async getThreads(params?: {
     page?: number
     limit?: number
+    cursor?: string
     tagId?: string
     userId?: string
     pinned?: boolean
@@ -238,6 +239,7 @@ export class ForumAPI {
       const queryParams = new URLSearchParams()
       if (params.query) queryParams.append("query", params.query)
       if (params.cursor) queryParams.append("cursor", params.cursor)
+      if (params.limit) queryParams.append("limit", params.limit.toString())
       if (params.filter) queryParams.append("filter", params.filter)
 
       const queryString = queryParams.toString() ? `?${queryParams.toString()}` : ""

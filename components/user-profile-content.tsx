@@ -22,6 +22,12 @@ export function UserProfileContent({ userId }: { userId: string }) {
   const [following, setFollowing] = useState<any[]>([])
   const [isFollowing, setIsFollowing] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMoreThreads, setIsLoadingMoreThreads] = useState(false)
+  const [isLoadingMoreFollowers, setIsLoadingMoreFollowers] = useState(false)
+  const [isLoadingMoreFollowing, setIsLoadingMoreFollowing] = useState(false)
+  const [threadsCursor, setThreadsCursor] = useState<string | null>(null)
+  const [followersCursor, setFollowersCursor] = useState<string | null>(null)
+  const [followingCursor, setFollowingCursor] = useState<string | null>(null)
 
   useEffect(() => {
     loadUser()
@@ -35,16 +41,19 @@ export function UserProfileContent({ userId }: { userId: string }) {
         throw new Error("Failed to fetch user")
       })
 
-      const threadsData = await ForumAPI.getThreads({ userId, limit: 20 }).catch(() => ({ threads: [] }))
+      const threadsData = await ForumAPI.getThreads({ userId, limit: 7 }).catch(() => ({ threads: [], nextThreadCursor: null }))
 
-      const followersData = await ForumAPI.getUserFollowers(userId).catch(() => ({ followers: [] }))
+      const followersData = await ForumAPI.getUserFollowers(userId).catch(() => ({ followers: [], nextCursor: null }))
 
-      const followingData = await ForumAPI.getUserFollowing(userId).catch(() => ({ following: [] }))
+      const followingData = await ForumAPI.getUserFollowing(userId).catch(() => ({ following: [], nextCursor: null }))
 
       setUser(userData)
       setThreads(threadsData.threads || [])
+      setThreadsCursor(threadsData.nextThreadCursor || null)
       setFollowers(followersData.followers || [])
+      setFollowersCursor(followersData.nextCursor || null)
       setFollowing(followingData.following || [])
+      setFollowingCursor(followingData.nextCursor || null)
 
       if (currentUser) {
         const isCurrentlyFollowing = followersData.followers?.some((f: any) => f.followerId === currentUser.id)
@@ -58,6 +67,48 @@ export function UserProfileContent({ userId }: { userId: string }) {
       })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadMoreThreads = async () => {
+    if (!threadsCursor) return
+    setIsLoadingMoreThreads(true)
+    try {
+      const data = await ForumAPI.getThreads({ userId, limit: 7, cursor: threadsCursor })
+      setThreads(prev => [...prev, ...(data.threads || [])])
+      setThreadsCursor(data.nextThreadCursor || null)
+    } catch (error) {
+      console.error("Failed to load more threads:", error)
+    } finally {
+      setIsLoadingMoreThreads(false)
+    }
+  }
+
+  const loadMoreFollowers = async () => {
+    if (!followersCursor) return
+    setIsLoadingMoreFollowers(true)
+    try {
+      const data = await ForumAPI.getUserFollowers(userId, undefined, followersCursor)
+      setFollowers(prev => [...prev, ...(data.followers || [])])
+      setFollowersCursor(data.nextCursor || null)
+    } catch (error) {
+      console.error("Failed to load more followers:", error)
+    } finally {
+      setIsLoadingMoreFollowers(false)
+    }
+  }
+
+  const loadMoreFollowing = async () => {
+    if (!followingCursor) return
+    setIsLoadingMoreFollowing(true)
+    try {
+      const data = await ForumAPI.getUserFollowing(userId, undefined, followingCursor)
+      setFollowing(prev => [...prev, ...(data.following || [])])
+      setFollowingCursor(data.nextCursor || null)
+    } catch (error) {
+      console.error("Failed to load more following:", error)
+    } finally {
+      setIsLoadingMoreFollowing(false)
     }
   }
 
@@ -185,7 +236,23 @@ export function UserProfileContent({ userId }: { userId: string }) {
                   <p>No threads yet</p>
                 </div>
               ) : (
-                threads.map((thread) => <ThreadCard key={thread.id} thread={thread} />)
+                <>
+                  {threads.map((thread) => <ThreadCard key={thread.id} thread={thread} />)}
+                  {threadsCursor && (
+                    <div className="flex justify-center mt-6">
+                      <Button onClick={loadMoreThreads} disabled={isLoadingMoreThreads} variant="outline">
+                        {isLoadingMoreThreads ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            Loading...
+                          </>
+                        ) : (
+                          "Load More"
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </>
               )}
             </TabsContent>
             <TabsContent value="followers" className="mt-6">
@@ -195,24 +262,40 @@ export function UserProfileContent({ userId }: { userId: string }) {
                     <p>No followers yet</p>
                   </div>
                 ) : (
-                  followers.map((follower: any) => (
-                    <Card key={follower.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={follower.follower?.image || "/placeholder.svg"} alt={`${follower.follower?.username || "User"} avatar`} />
-                            <AvatarFallback>{follower.follower?.username?.[0]?.toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <p className="font-semibold">
-                              {follower.follower?.displayName || follower.follower?.username}
-                            </p>
-                            <p className="text-sm text-muted-foreground">@{follower.follower?.username}</p>
+                  <>
+                    {followers.map((follower: any) => (
+                      <Card key={follower.id}>
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={follower.follower?.image || "/placeholder.svg"} alt={`${follower.follower?.username || "User"} avatar`} />
+                              <AvatarFallback>{follower.follower?.username?.[0]?.toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <p className="font-semibold">
+                                {follower.follower?.displayName || follower.follower?.username}
+                              </p>
+                              <p className="text-sm text-muted-foreground">@{follower.follower?.username}</p>
+                            </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {followersCursor && (
+                      <div className="flex justify-center mt-2">
+                        <Button onClick={loadMoreFollowers} disabled={isLoadingMoreFollowers} variant="outline">
+                          {isLoadingMoreFollowers ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              Loading...
+                            </>
+                          ) : (
+                            "Load More"
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </TabsContent>
@@ -223,24 +306,40 @@ export function UserProfileContent({ userId }: { userId: string }) {
                     <p>Not following anyone yet</p>
                   </div>
                 ) : (
-                  following.map((follow: any) => (
-                    <Card key={follow.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={follow.following?.image || "/placeholder.svg"} alt={`${follow.following?.username || "User"} avatar`} />
-                            <AvatarFallback>{follow.following?.username?.[0]?.toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <p className="font-semibold">
-                              {follow.following?.displayName || follow.following?.username}
-                            </p>
-                            <p className="text-sm text-muted-foreground">@{follow.following?.username}</p>
+                  <>
+                    {following.map((follow: any) => (
+                      <Card key={follow.id}>
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={follow.following?.image || "/placeholder.svg"} alt={`${follow.following?.username || "User"} avatar`} />
+                              <AvatarFallback>{follow.following?.username?.[0]?.toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <p className="font-semibold">
+                                {follow.following?.displayName || follow.following?.username}
+                              </p>
+                              <p className="text-sm text-muted-foreground">@{follow.following?.username}</p>
+                            </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {followingCursor && (
+                      <div className="flex justify-center mt-2">
+                        <Button onClick={loadMoreFollowing} disabled={isLoadingMoreFollowing} variant="outline">
+                          {isLoadingMoreFollowing ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              Loading...
+                            </>
+                          ) : (
+                            "Load More"
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </TabsContent>

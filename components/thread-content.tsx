@@ -24,6 +24,8 @@ export function ThreadContent({ threadId }: { threadId: string }) {
   const [thread, setThread] = useState<any>(null)
   const [posts, setPosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [nextCursor, setNextCursor] = useState<string | null>(null)
   const { toast } = useToast()
 
   const loadThread = async () => {
@@ -31,14 +33,31 @@ export function ThreadContent({ threadId }: { threadId: string }) {
     try {
       const [threadData, postsData] = await Promise.all([
         ForumAPI.getThread(threadId),
-        ForumAPI.getPosts({ threadId, limit: 100 }),
+        ForumAPI.getPosts({ threadId, limit: 7 }),
       ])
+      console.log('Posts API Response:', postsData)
+      console.log('Posts Next Cursor:', postsData.nextPostCursor)
       setThread(threadData)
       setPosts(postsData.posts || [])
+      setNextCursor(postsData.nextPostCursor || null)
     } catch (error) {
       console.error("Failed to load thread:", error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadMorePosts = async () => {
+    if (!nextCursor) return
+    setIsLoadingMore(true)
+    try {
+      const postsData = await ForumAPI.getPosts({ threadId, limit: 7, cursor: nextCursor })
+      setPosts(prev => [...prev, ...(postsData.posts || [])])
+      setNextCursor(postsData.nextPostCursor || null)
+    } catch (error) {
+      console.error("Failed to load more posts:", error)
+    } finally {
+      setIsLoadingMore(false)
     }
   }
 
@@ -175,7 +194,9 @@ export function ThreadContent({ threadId }: { threadId: string }) {
         </Card>
 
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">{posts.length} Replies</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            {posts.length} {nextCursor ? '+' : ''} Replies
+          </h2>
 
           {user && !thread.locked && (
             <Card className="mb-4">
@@ -190,6 +211,25 @@ export function ThreadContent({ threadId }: { threadId: string }) {
               <PostCard key={post.id} post={post} onUpdate={loadThread} isThreadOwner={isThreadOwner} />
             ))}
           </div>
+
+          {nextCursor && posts.length > 0 && (
+            <div className="flex justify-center mt-6">
+              <Button
+                onClick={loadMorePosts}
+                disabled={isLoadingMore}
+                variant="outline"
+              >
+                {isLoadingMore ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Loading...
+                  </>
+                ) : (
+                  "Load More Replies"
+                )}
+              </Button>
+            </div>
+          )}
 
           {posts.length === 0 && (
             <div className="text-center py-8">

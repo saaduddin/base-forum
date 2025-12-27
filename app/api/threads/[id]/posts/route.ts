@@ -11,6 +11,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const data = await client.threads.getPosts(id, {
       ...(searchParams.get("query") && { query: searchParams.get("query")! }),
       ...(searchParams.get("cursor") && { cursor: searchParams.get("cursor")! }),
+      ...(searchParams.get("limit") && { limit: parseInt(searchParams.get("limit")!) }),
       ...(searchParams.get("filter") && { filter: searchParams.get("filter")! as 'newest' | 'oldest' }),
     })
     return NextResponse.json(data)

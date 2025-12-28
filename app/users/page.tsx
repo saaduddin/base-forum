@@ -28,7 +28,6 @@ export default function UsersPage() {
       if (cursor) params.cursor = cursor
       
       const data = await ForumAPI.getUsers(params)
-      console.log('Users API Response:', data)
       if (append) {
         setUsers(prev => [...prev, ...(data.users || [])])
       } else {

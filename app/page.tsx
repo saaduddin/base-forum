@@ -26,8 +26,6 @@ export default function HomePage() {
     }
     try {
       const data = await ForumAPI.getThreads({ filter, limit: 7, ...(cursor && { cursor }) })
-      console.log('API Response:', data)
-      console.log('Next Cursor:', data.nextThreadCursor)
       const newThreads = data.threads || []
       if (append) {
         setThreads(prev => [...prev, ...newThreads])

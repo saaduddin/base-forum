@@ -43,7 +43,7 @@ export function ForumHeader() {
             Tags
           </Link>
           <Link href="/users" className="text-muted-foreground hover:text-foreground transition-colors">
-            Members
+            Users
           </Link>
         </div>
 

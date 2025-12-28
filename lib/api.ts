@@ -92,6 +92,7 @@ export class ForumAPI {
     page?: number
     limit?: number
     search?: string
+    cursor?: string
   }) {
     const query = new URLSearchParams(params as any).toString()
     const res = await fetch(`/api/users?${query}`)

@@ -23,6 +23,7 @@ export function ThreadContent({ threadId }: { threadId: string }) {
   const { openAuthDialog } = useAuthDialog()
   const [thread, setThread] = useState<any>(null)
   const [posts, setPosts] = useState<any[]>([])
+  const [postsCount, setPostsCount] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [nextCursor, setNextCursor] = useState<string | null>(null)
@@ -35,10 +36,9 @@ export function ThreadContent({ threadId }: { threadId: string }) {
         ForumAPI.getThread(threadId),
         ForumAPI.getPosts({ threadId, limit: 7 }),
       ])
-      console.log('Posts API Response:', postsData)
-      console.log('Posts Next Cursor:', postsData.nextPostCursor)
       setThread(threadData)
       setPosts(postsData.posts || [])
+      setPostsCount(postsData.count || 0)
       setNextCursor(postsData.nextPostCursor || null)
     } catch (error) {
       console.error("Failed to load thread:", error)
@@ -180,7 +180,7 @@ export function ThreadContent({ threadId }: { threadId: string }) {
               </div>
             )}
 
-            <div className="flex items-center gap-2 pt-4 border-t">
+            <div className="flex items-center gap-2 pt-4">
               <Button variant={hasLiked ? "default" : "outline"} size="sm" onClick={handleLike}>
                 <Heart className="h-4 w-4 mr-1" />
                 {likesCount}
@@ -194,9 +194,7 @@ export function ThreadContent({ threadId }: { threadId: string }) {
         </Card>
 
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">
-            {posts.length}{nextCursor ? '+' : ''} Posts
-          </h2>
+          <h2 className="text-xl font-semibold mb-4">{postsCount} Posts</h2>
 
           {user && !thread.locked && (
             <Card className="mb-4">
@@ -225,7 +223,7 @@ export function ThreadContent({ threadId }: { threadId: string }) {
                     Loading...
                   </>
                 ) : (
-                  "Load More Posts"
+                  "Load More"
                 )}
               </Button>
             </div>

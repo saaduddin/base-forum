@@ -50,7 +50,7 @@ export function Navbar() {
                 Tags
               </Link>
               <Link href="/users" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Members
+                Users
               </Link>
             </div>
           </div>

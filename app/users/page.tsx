@@ -23,7 +23,12 @@ export default function UsersPage() {
       setIsLoading(true)
     }
     try {
-      const data = await ForumAPI.getUsers({ search: searchQuery || undefined, limit: 7, ...(cursor && { cursor }) })
+      const params: any = { limit: 7 }
+      if (searchQuery) params.search = searchQuery
+      if (cursor) params.cursor = cursor
+      
+      const data = await ForumAPI.getUsers(params)
+      console.log('Users API Response:', data)
       if (append) {
         setUsers(prev => [...prev, ...(data.users || [])])
       } else {
@@ -58,13 +63,13 @@ export default function UsersPage() {
           <ForumHeader />
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Community Members</h1>
-            <p className="text-muted-foreground mb-4">Connect with other forum members</p>
+            <h1 className="text-3xl font-bold mb-2">Community Users</h1>
+            <p className="text-muted-foreground mb-4">Connect with other forum users</p>
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search members..."
+                placeholder="Search users..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
@@ -75,6 +80,10 @@ export default function UsersPage() {
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : users.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No users found</p>
             </div>
           ) : (
             <>
